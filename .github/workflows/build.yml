@@ -32,17 +32,31 @@ jobs:
           fi
 
           echo "Using archive: $ARCHIVE"
+
           7z x "$ARCHIVE" -oextracted
 
-          ROOT=$(find extracted -type f -name "settings.gradle" -printf '%h\n' | head -n 1)
+          ZIPFILE=$(find extracted -type f -name "*.zip" | head -n 1)
+
+          if [ -n "$ZIPFILE" ]; then
+            echo "Nested ZIP found: $ZIPFILE"
+            mkdir -p extracted/project
+            7z x "$ZIPFILE" -oextracted/project
+          fi
+
+          ROOT=$(find extracted -type f -name "settings.gradle" -printf "%h\n" | head -n 1)
 
           if [ -z "$ROOT" ]; then
-            echo "settings.gradle not found"
-            find extracted -maxdepth 5 -type f | head -100
+            ROOT=$(find extracted -type f -name "settings.gradle.kts" -printf "%h\n" | head -n 1)
+          fi
+
+          if [ -z "$ROOT" ]; then
+            echo "Android project not found"
+            find extracted -maxdepth 5 -type f
             exit 1
           fi
 
           echo "Android project found at: $ROOT"
+
           cp -a "$ROOT"/. ./
 
       - name: Setup Java 17
