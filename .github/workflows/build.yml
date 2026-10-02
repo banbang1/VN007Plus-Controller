@@ -58,7 +58,10 @@ jobs:
           echo "Android project found at: $ROOT"
 
           cp -a "$ROOT"/. ./
-        
+                 - name: Enable AndroidX
+          run: |
+            echo "android.useAndroidX=true" >> gradle.properties
+            echo "android.enableJetifier=true" >> gradle.properties        
       
           
 
